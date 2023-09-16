@@ -11,7 +11,7 @@ use bigdecimal::{num_bigint::BigInt, BigDecimal, FromPrimitive, ToPrimitive};
 use bit_vec::BitVec;
 use bytes::BytesMut;
 #[cfg(feature = "chrono")]
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 #[cfg(feature = "bigdecimal")]
 pub(crate) use decimal::DecimalWrapper;
 use postgres_types::{FromSql, ToSql, WrongType};
@@ -252,7 +252,7 @@ impl GetRow for PostgresRow {
                 PostgresType::TIMESTAMP => match row.try_get(i)? {
                     Some(val) => {
                         let ts: NaiveDateTime = val;
-                        let dt = DateTime::<Utc>::from_utc(ts, Utc);
+                        let dt = Utc.from_utc_datetime(&ts);
                         Value::datetime(dt)
                     }
                     None => Value::DateTime(None),
@@ -364,7 +364,7 @@ impl GetRow for PostgresRow {
 
                         let dates = val
                             .into_iter()
-                            .map(|dt| Value::DateTime(dt.map(|dt| DateTime::<Utc>::from_utc(dt, Utc))));
+                            .map(|dt| Value::DateTime(dt.as_ref().map(|dt| Utc.from_utc_datetime(dt))));
 
                         Value::array(dates)
                     }

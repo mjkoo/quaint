@@ -43,6 +43,7 @@ impl<'a> Expression<'a> {
         }
     }
 
+    #[allow(unused)]
     #[cfg(feature = "json")]
     pub(crate) fn is_json_expr(&self) -> bool {
         match &self.kind {
